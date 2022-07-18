@@ -63,20 +63,6 @@ Moralis.Cloud.afterSave("ItemListed", async (request) => {
     }
 })
 
-async function getItemQuery(request, moralisObjectName, objectItems) {
-    const MoralisObject = Moralis.Object.extend(moralisObjectName)
-    const query = new Moralis.Query(MoralisObject)
-    // loop through objectItems:
-    const keys = Object.keys(objectItems)
-    for (const key of keys) {
-        logger.info(`Key: ${key}`)
-        logger.info(`Value: ${objectItems[key]}`)
-        logger.info(`Returned: ${request.object.get(objectItems[key])}`)
-        await query.equalTo(key, request.object.get(objectItems[key]))
-    }
-    return query
-}
-
 Moralis.Cloud.afterSave("ItemBought", async (request) => {
     const confirmed = request.object.get("confirmed")
     const logger = Moralis.Cloud.getLogger()
@@ -149,4 +135,18 @@ async function setMoralisObject(request, moralisObjectName, objectItems) {
     }
     logger.info(`Saving ${moralisObjectName}`)
     moralisObject.save()
+}
+
+async function getItemQuery(request, moralisObjectName, objectItems) {
+    const MoralisObject = Moralis.Object.extend(moralisObjectName)
+    const query = new Moralis.Query(MoralisObject)
+    // loop through objectItems:
+    const keys = Object.keys(objectItems)
+    for (const key of keys) {
+        logger.info(`Key: ${key}`)
+        logger.info(`Value: ${objectItems[key]}`)
+        logger.info(`Returned: ${request.object.get(objectItems[key])}`)
+        await query.equalTo(key, request.object.get(objectItems[key]))
+    }
+    return query
 }

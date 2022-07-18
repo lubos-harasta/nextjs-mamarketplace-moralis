@@ -1,15 +1,19 @@
 import Head from "next/head"
 import Image from "next/image"
 import styles from "../styles/Home.module.css"
+import { Form } from "web3uikit"
 
 export default function Home() {
     return (
         <div className={styles.container}>
-            <Head>
-                <title>NFT MAMA Playground</title>
-                <meta name="description" content="NFT MAMA Playground" />
-                <link rel="icon" href="/favicon.ico" />
-            </Head>
+            <Form
+                data={[
+                    {
+                        name: "NFT Address",
+                        type: "text",
+                    },
+                ]}
+            ></Form>
             Sell Page
         </div>
     )
