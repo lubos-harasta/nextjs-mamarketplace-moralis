@@ -7,7 +7,8 @@ require("dotenv").config()
 const contractAddresses = require("./constants/networkMapping.json") // to get address of deployed smart contraxcts
 let chainId = process.env.chainId || 31337 // get the localhost chainId
 let moralisChainId = chainId == "31337" ? "1337" : chainId // Moralis takes 1337 as localchain/devchain
-const contractAddress = contractAddresses[chainId]["NftMarketplace"][0] // grab the first address
+const nftMarketplaceAddress = contractAddresses[chainId]["NftMarketplace"][0] // grab the first address
+const basicNftAddress = contractAddresses[chainId]["BasicNft"][0] // grab the first address
 
 // see more info at: https://docs.moralis.io/moralis-dapp/connect-the-sdk/connect-using-node
 
@@ -18,12 +19,12 @@ async function main() {
     const masterKey = process.env.moralisMasterKey
 
     await Moralis.start({ serverUrl, appId, masterKey })
-    console.log(`Working with the contract ${contractAddress}`)
+    console.log(`Working with the contract ${nftMarketplaceAddress}`)
 
     // define events to be listened
     let itemListedOptions = {
         chainId: moralisChainId,
-        address: contractAddress,
+        address: nftMarketplaceAddress,
         sync_historical: true,
         topic: "ItemListed(address,address,uint256,uint256)",
         abi: {
@@ -62,7 +63,7 @@ async function main() {
 
     let itemBoughtOptions = {
         chainId: moralisChainId,
-        address: contractAddress,
+        address: nftMarketplaceAddress,
         sync_historical: true,
         topic: "ItemBought(address,address,uint256,uint256)",
         abi: {
@@ -101,7 +102,7 @@ async function main() {
 
     let itemCanceledOptions = {
         chainId: moralisChainId,
-        address: contractAddress,
+        address: nftMarketplaceAddress,
         sync_historical: true,
         topic: "ItemCanceled(address,address,uint256)",
         abi: {

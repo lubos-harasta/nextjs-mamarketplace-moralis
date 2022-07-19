@@ -12,7 +12,7 @@ export default function Home() {
         (query) => query.limit(10).descending("tokenId")
     )
     return (
-        <div className="container mx-auto">
+        <div className="container mx-px">
             <h1 className="py-4 px-4 font-bold text-2xl">Currently listed NFTs</h1>
             <div className="flex flex-wrap">
                 {isWeb3Enabled ? (

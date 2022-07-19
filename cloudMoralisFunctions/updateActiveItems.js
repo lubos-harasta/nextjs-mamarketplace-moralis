@@ -29,6 +29,22 @@ const itemBoughtArray = {
     price: "price",
 }
 
+const nftMintedArray = {
+    nftAddress: "address",
+    tokenId: "tokenId",
+    owner: "to",
+}
+
+Moralis.Cloud.afterSave("NftMinted", async (request) => {
+    const confirmed = request.object.get("confirmed")
+    const logger = Moralis.Cloud.getLogger() // to be able log on Moralis server
+
+    if (confirmed) {
+        logger.info("Minted NFT found!")
+        await setMoralisObject(request, "NftOwners", nftMintedArray)
+    }
+})
+
 Moralis.Cloud.afterSave("ItemListed", async (request) => {
     // Every event gets triggered twice (the first time is unconfirmed once the function is called and
     // and when the TX is mined then it is confirmed.
@@ -75,14 +91,38 @@ Moralis.Cloud.afterSave("ItemBought", async (request) => {
         logger.info(`Marketplace | Bought Item: ${boughtItem}`)
 
         if (boughtItem) {
+            const tokenId = request.object.get("tokenId")
+            const nftAddress = request.object.get("nftAddress")
+            const newOwner = request.object.get("buyer")
+
             logger.info(
-                `Deleting NFT with tokenId ${request.object.get(
-                    "tokenId"
-                )} on address ${request.object.get(
-                    "nftAddress"
-                )} since it was bought by ${request.object.get("buyer")}.`
+                `Deleting NFT with tokenId ${tokenId} on address ${nftAddress} since it was bought by ${newOwner}.`
             )
             await boughtItem.destroy()
+
+            logger.info("Updating the owner of the bought NFT...")
+            // create the new Object and remove the owner
+            const nftOldRecordArray = Object.assign({}, nftMintedArray)
+            delete nftOldRecordArray.owner
+            nftOldRecordArray.nftAddress = "nftAddress"
+            // create the query
+            const ownerQuery = await getItemQuery(request, "NftOwners", nftOldRecordArray)
+            const oldRecordExists = await ownerQuery.first()
+            logger.info(`Old Record: ${oldRecordExists}`)
+
+            if (oldRecordExists) {
+                logger.info(`Old record exists, thus deleting it...`)
+                await oldRecordExists.destroy()
+                const nftNewRecordArray = {
+                    nftAddress: "nftAddress",
+                    tokenId: "tokenId",
+                    owner: "buyer",
+                }
+                logger.info(
+                    `Assigning the new owner with address ${newOwner} of NFT #${tokenId} on address ${nftAddress}`
+                )
+                await setMoralisObject(request, "NftOwners", nftNewRecordArray)
+            }
         } else {
             logger.info(
                 `No NFT with tokenId ${request.object.get(
